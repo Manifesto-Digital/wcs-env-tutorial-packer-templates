@@ -1,0 +1,103 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos-6.6/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 40960,
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "RedHat_64",
+      "hard_drive_interface": "sata",
+      "http_directory": "http",
+      "iso_checksum": "08be09fd7276822bd3468af8f96198279ffc41f0",
+      "iso_checksum_type": "sha1",
+      "iso_url": "{{user `mirror`}}/6.6/isos/x86_64/CentOS-6.6-x86_64-bin-DVD1.iso",
+      "output_directory": "packer-centos-6.6-x86_64-virtualbox",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "1024"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ],
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "wcs-centos-6.6-x86_64"
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "builds/{{user `box_basename`}}.{{.Provider}}.box",
+      "type": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/bento-metadata.json",
+      "source": "{{user `metadata`}}",
+      "type": "file"
+    },
+    {
+      "environment_vars": [],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/common/metadata.sh",
+        "scripts/centos/fix-slow-dns.sh",
+        "scripts/common/sshd.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/common/vmtools.sh"
+      ],
+      "type": "shell"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/common/ansible.sh"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible/wcs.yml",
+      "group_vars": "ansible/group_vars",
+      "inventory_file": "ansible/hosts",
+      "role_paths": [
+        "ansible/roles/common",
+        "ansible/roles/oracle",
+        "ansible/roles/tomcat",
+        "ansible/roles/web-center-sites"                
+      ]
+    },      
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/centos/cleanup.sh",
+        "scripts/common/minimize.sh"
+      ]
+    }      
+  ],
+  "variables": {
+    "arch": "64",
+    "box_basename": "wcs-centos-6.6",
+    "build_timestamp": "{{isotime \"20060102150405\"}}",
+    "git_revision": "__unknown_git_revision__",
+    "metadata": "floppy/dummy_metadata.json",
+    "mirror": "http://mirrors.kernel.org/centos",
+    "name": "wcs-centos-6.6",
+    "template": "centos-6.6-x86_64",
+    "version": "2.0.TIMESTAMP"
+  }
+}
+

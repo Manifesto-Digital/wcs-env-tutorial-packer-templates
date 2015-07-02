@@ -1,0 +1,3 @@
+[submodule "ansible/roles"]
+	path = ansible/roles
+	url = https://github.com/Manifesto-Digital/wcs-env-tutorial-ansible-playbooks.git
