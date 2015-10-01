@@ -88,7 +88,7 @@
     "box_basename": "wcs-centos-6.6",
     "build_timestamp": "{{isotime \"20060102150405\"}}",
     "git_revision": "__unknown_git_revision__",
-    "mirror": "http://mirrors.kernel.org/centos",
+    "mirror": "http://archive.kernel.org/centos-vault",
     "name": "wcs-centos-6.6",
     "template": "centos-6.6-x86_64",
     "version": "2.0.TIMESTAMP"
